@@ -833,7 +833,6 @@ local Button = CharacterTab:CreateButton({
 local AimTab = Window:CreateTab("Aim", nil) -- Title, Image
 local AimSection = AimTab:CreateSection("Aimbot,CameraLock m.m")
 
-
 local Button = AimTab:CreateButton({
    Name = "Camera Lock (X)",
    Callback = function()
@@ -841,10 +840,8 @@ local Button = AimTab:CreateButton({
    end,
 })
 
-local Button = AimTab:CreateButton({
-   Name = "Silent Aim Snappy",
-   Callback = function()
-   -- Services
+
+-- Services
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
@@ -854,8 +851,8 @@ local Camera = Workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
 -- Variables
-local silentAimActive = true
-local fovRadius = 130 -- Default FOV radius in pixels
+local silentAimActive = false -- Controlled by the toggle
+local fovRadius = 200 -- Initial FOV radius in pixels
 local fovCircleVisible = true -- Toggle FOV circle visibility
 
 -- FOV Circle Drawing
@@ -871,23 +868,8 @@ fovCircle.Filled = false
 local function updateFOVCircle()
     local mousePosition = UserInputService:GetMouseLocation()
     fovCircle.Position = mousePosition
+    fovCircle.Visible = silentAimActive -- Show the FOV circle only if aimlock is enabled
 end
-
--- Function to dynamically toggle the FOV Circle's visibility
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.V then -- Press 'V' to toggle visibility
-        fovCircleVisible = not fovCircleVisible
-        fovCircle.Visible = fovCircleVisible
-    end
-end)
-
--- Function to change FOV radius dynamically
-UserInputService.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseWheel then
-        fovRadius = math.clamp(fovRadius + input.Position.Z * 5, 50, 500) -- Adjust radius with mouse scroll
-        fovCircle.Radius = fovRadius
-    end
-end)
 
 -- Function to get the nearest target's head within FOV
 local function getNearestHeadInFOV()
@@ -931,12 +913,33 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
+-- Toggle to enable/disable aimlock
+local Toggle = AimTab:CreateToggle({
+    Name = "Enable Aimlock",
+    CurrentValue = silentAimActive,
+    Flag = "AimlockToggle",
+    Callback = function(Value)
+        silentAimActive = Value -- Set aimlock state based on toggle
+    end,
+})
+
+-- Slider to control FOV radius
+local Slider = AimTab:CreateSlider({
+    Name = "Aimlock FOV",
+    Range = {50, 500}, -- Minimum and maximum radius
+    Increment = 1,
+    Suffix = " FOV", -- Display as "Pixels"
+    CurrentValue = fovRadius,
+    Flag = "FOVSlider",
+    Callback = function(Value)
+        fovRadius = Value -- Update FOV radius
+        fovCircle.Radius = fovRadius -- Update the visual representation
+    end,
+})
+
 -- Update the FOV Circle every frame
 RunService.RenderStepped:Connect(function()
     updateFOVCircle()
 end)
 
-print("Smarter FOV Circle with Silent Aim loaded successfully.")
-
-   end,
-})
+print("Aimlock System with Dropdown, Toggle, and Slider loaded successfully.")
