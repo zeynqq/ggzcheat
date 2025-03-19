@@ -840,3 +840,103 @@ local Button = AimTab:CreateButton({
    loadstring(game:HttpGet("https://raw.githubusercontent.com/zeynqq/ggzcheat/refs/heads/main/message.txt"))()
    end,
 })
+
+local Button = AimTab:CreateButton({
+   Name = "Silent Aim Snappy",
+   Callback = function()
+   -- Services
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Camera = Workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+-- Variables
+local silentAimActive = true
+local fovRadius = 130 -- Default FOV radius in pixels
+local fovCircleVisible = true -- Toggle FOV circle visibility
+
+-- FOV Circle Drawing
+local fovCircle = Drawing.new("Circle")
+fovCircle.Visible = fovCircleVisible
+fovCircle.Transparency = 1
+fovCircle.Thickness = 2
+fovCircle.Color = Color3.fromRGB(0, 255, 0) -- Green color for FOV
+fovCircle.Radius = fovRadius
+fovCircle.Filled = false
+
+-- Function to update the FOV Circle's position
+local function updateFOVCircle()
+    local mousePosition = UserInputService:GetMouseLocation()
+    fovCircle.Position = mousePosition
+end
+
+-- Function to dynamically toggle the FOV Circle's visibility
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.V then -- Press 'V' to toggle visibility
+        fovCircleVisible = not fovCircleVisible
+        fovCircle.Visible = fovCircleVisible
+    end
+end)
+
+-- Function to change FOV radius dynamically
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseWheel then
+        fovRadius = math.clamp(fovRadius + input.Position.Z * 5, 50, 500) -- Adjust radius with mouse scroll
+        fovCircle.Radius = fovRadius
+    end
+end)
+
+-- Function to get the nearest target's head within FOV
+local function getNearestHeadInFOV()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local rootPart = player.Character.HumanoidRootPart
+            local head = player.Character:FindFirstChild("Head")
+            local screenPosition, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+
+            -- Check if the target is within the FOV radius
+            if onScreen then
+                local mousePosition = UserInputService:GetMouseLocation()
+                local distanceFromMouse = (Vector2.new(screenPosition.X, screenPosition.Y) - mousePosition).Magnitude
+                if distanceFromMouse <= fovRadius and distanceFromMouse < shortestDistance then
+                    shortestDistance = distanceFromMouse
+                    closestPlayer = player
+                end
+            end
+        end
+    end
+
+    if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
+        return closestPlayer.Character.Head
+    end
+
+    return nil
+end
+
+-- Silent aim functionality with headshots
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and silentAimActive then
+        local targetHead = getNearestHeadInFOV()
+        if targetHead then
+            local aimPosition = targetHead.Position
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, aimPosition)
+            ReplicatedStorage.Remotes.Attack:FireServer(targetHead)
+        end
+    end
+end)
+
+-- Update the FOV Circle every frame
+RunService.RenderStepped:Connect(function()
+    updateFOVCircle()
+end)
+
+print("Smarter FOV Circle with Silent Aim loaded successfully.")
+
+   end,
+})
