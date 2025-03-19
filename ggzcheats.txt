@@ -803,30 +803,9 @@ loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Human%20Flashlight.tx
 })
 
 local Button = CharacterTab:CreateButton({
-   Name = "Gravity Switch",
-   Callback = function()
-loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Gravity%20Switch.txt"))   
-   end,
-})
-
-local Button = CharacterTab:CreateButton({
-   Name = "Blockhead",
-   Callback = function()
-   loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Blockhead.txt"))()
-   end,
-})
-
-local Button = CharacterTab:CreateButton({
    Name = "Remove Legs",
    Callback = function()
    loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Remove%20Legs.txt"))()
-   end,
-})
-
-local Button = CharacterTab:CreateButton({
-   Name = "Limp",
-   Callback = function()
-   loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Limp%20Character.txt"))()
    end,
 })
 
@@ -848,5 +827,16 @@ local Button = CharacterTab:CreateButton({
    Name = "Ctrl + Click tp",
    Callback = function()
    loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Click%20Teleport.txt"))()
+   end,
+})
+
+local AimTab = Window:CreateTab("Aim", nil) -- Title, Image
+local AimSection = AimTab:CreateSection("Aimbot,CameraLock m.m")
+
+
+local Button = AimTab:CreateButton({
+   Name = "Camera Lock (X)",
+   Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/zeynqq/ggzcheat/refs/heads/main/message.txt"))()
    end,
 })
